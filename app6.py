@@ -3,7 +3,6 @@ import re
 import pandas as pd
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_experimental.agents import create_pandas_dataframe_agent
-from langchain_openai import ChatOpenAI  # Remove if not needed elsewhere
 
 # Variable to store conversation history
 conversation_history = ""
@@ -12,7 +11,7 @@ selected_column = None  # Variable to store the selected column
 def fetch_the_answer(df, question):
     global conversation_history, selected_column
 
-    # Initialize the chat model using Google credentials from st.secrets
+    # Initialize the chat model using your in-house Google credentials
     chat = ChatGoogleGenerativeAI(
         api_key=st.secrets["GOOGLE_API_KEY"],
         model="gemini-2.5-pro-exp-03-25",
@@ -44,8 +43,12 @@ def fetch_the_answer(df, question):
         # Proceed without specifying a column if none is provided
         prompt = f"Answer the following question: {question} {prompt_instructions}\n{conversation_history}"
 
-    # Run the agent with the constructed prompt
-    res = agent.run(prompt)
+    try:
+        # Run the agent with the constructed prompt
+        res = agent.run(prompt)
+    except Exception as e:
+        # Catch any exceptions (including "list index out of range") and display an error message
+        return f"An error occurred while generating an answer: {str(e)}"
 
     # Attempt to extract a column from the agent's response (if provided)
     column_match = re.search(r"Column: (.+?)\n", res)
@@ -92,7 +95,7 @@ if __name__ == "__main__":
     uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
     if uploaded_file is not None:
         st.write('')
-        # Form for user question input (API key input removed)
+        # Form for user question input
         with st.form(key='my_form'):
             question = st.text_input("Enter your question")
             submit_button = st.form_submit_button(label='Generate Answer')
