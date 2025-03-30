@@ -9,6 +9,44 @@ from langchain.docstore.document import Document
 st.set_page_config(layout="wide", page_title="CSV Q&A Alternative Approach")
 st.title("Talk to your CSV data")
 
+st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Agdasima');
+    .custom-text-2 { font-family: 'Agdasima', sans-serif; font-size: 30px; color: cyan; }
+    </style>
+    <p class="custom-text-2">
+        Unleashing the power of AI to transform your CSV data into enlightening conversations.
+    </p>
+""", unsafe_allow_html=True)
+
+st.divider()
+
+st.header('About the project')
+st.markdown(
+    '<div style="text-align: justify">This project is an AI-driven application that allows you to ask questions about your CSV data and receive insightful answers. It leverages the power of Large Language Models (LLMs) to understand your questions and provide contextually relevant responses based on the content of your uploaded CSV file. This is an alternative approach to using Pandas Agents, offering a simpler way to interact with your data.</div>',
+    unsafe_allow_html=True
+)
+
+st.write('')
+st.subheader('How to use the app')
+st.markdown(
+    '<div style="text-align: justify">1. ⬆️ **Upload your CSV file**: Use the file uploader below to upload the CSV file you want to analyze.</div>',
+    unsafe_allow_html=True
+)
+st.write('')
+st.markdown(
+    '<div style="text-align: justify">2. 🤔 **Ask your question**: Once the CSV is uploaded and previewed, a text input box will appear. Enter your question about the data in this box. Be as specific as possible for better results.</div>',
+    unsafe_allow_html=True
+)
+st.write('')
+st.markdown(
+    '<div style="text-align: justify">3. 💬 **Get your answer**: Click the "Submit" button. The application will process your question using AI and display the answer below.</div>',
+    unsafe_allow_html=True
+)
+
+st.write('')
+st.divider()
+
 # Upload CSV file
 uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
 
