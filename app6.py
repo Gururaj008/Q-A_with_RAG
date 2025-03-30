@@ -4,13 +4,13 @@ import pandas as pd
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_experimental.agents import create_pandas_dataframe_agent
 
-# Initialize session state variables if not already present
+# Initialize session state for conversation history and selected column
 if "conversation_history" not in st.session_state:
     st.session_state.conversation_history = ""
 if "selected_column" not in st.session_state:
     st.session_state.selected_column = None
 
-# Cache the chat model so it isn't reinitialized on every run
+# Cache the chat model so it isn’t reinitialized every time
 @st.experimental_singleton
 def get_chat_model():
     return ChatGoogleGenerativeAI(
@@ -20,14 +20,13 @@ def get_chat_model():
         max_tokens=4000
     )
 
-# Cache the creation of the agent per unique DataFrame
+# Cache the agent based on the DataFrame content
 @st.experimental_memo
 def get_agent(df):
     chat = get_chat_model()
     return create_pandas_dataframe_agent(chat, df, agent_executor_kwargs={'handle_parsing_errors': True})
 
 def fetch_the_answer(df, question):
-    # Get the agent (cached based on the DataFrame content)
     agent = get_agent(df)
 
     # Update conversation history with the current question
@@ -40,9 +39,8 @@ def fetch_the_answer(df, question):
         "present the results in tabular form using Markdown."
     )
     
-    # Build the prompt with column info (if available)
+    # Build the prompt with column information if provided
     if re.search(r"Column: (.+?)\n", question):
-        # If the question includes a column, update session state
         match = re.search(r"Column: (.+?)\n", question)
         st.session_state.selected_column = match.group(1)
         prompt = f"Answer the following question: {question} {prompt_instructions}\n{st.session_state.conversation_history}"
@@ -53,19 +51,26 @@ def fetch_the_answer(df, question):
         )
     else:
         prompt = f"Answer the following question: {question} {prompt_instructions}\n{st.session_state.conversation_history}"
-
+    
+    # DEBUG: Print the prompt being sent (remove or comment out after debugging)
+    st.write("DEBUG: Prompt being sent to the agent:")
+    st.code(prompt)
+    
     try:
-        # Run the agent with the constructed prompt
         res = agent.run(prompt)
     except Exception as e:
+        st.write("DEBUG: Exception details:", e)
         return f"An error occurred while generating an answer: {str(e)}"
-
-    # Optionally, extract the column from the agent's response (if provided)
+    
+    if not res:
+        return "No answer was generated. Please rephrase your question or provide more context."
+    
+    # Optionally, extract column information from the response
     column_match = re.search(r"Column: (.+?)\n", res)
     if column_match:
         st.session_state.selected_column = column_match.group(1)
-
-    # Update conversation history with the assistant's answer
+    
+    # Update conversation history with the assistant's response
     st.session_state.conversation_history += f"Assistant: {res}\nColumn: {st.session_state.selected_column}\n"
     return res
 
@@ -100,7 +105,7 @@ if __name__ == "__main__":
     
     st.write('')
     
-    # File uploader for CSV file
+    # CSV file uploader
     uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
