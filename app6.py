@@ -48,9 +48,10 @@ Answer:"""
             
             # Initialize the LLM (adjust model name as needed)
             llm = ChatGoogleGenerativeAI(
-                api_key=st.secrets["GOOGLE_API_KEY"],
-                model="gemini-2.5-pro-exp-03-25",  # Use a supported model name
-                temperature=0.0
+            api_key=st.secrets["GOOGLE_API_KEY"],
+            model="gemini-2.5-pro-exp-03-25",  # Use a supported model name
+            temperature=0.0,
+            convert_system_message_to_human=True  # Add this parameter
             )
             
             # Load the QA chain (using "stuff" chain type here)
