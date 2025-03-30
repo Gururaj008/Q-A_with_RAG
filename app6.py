@@ -114,8 +114,7 @@ else:
     st.warning("Please upload a CSV file to begin.")
 
 
-
-st.divider()
+   st.divider()
     col1001, col1002, col1003, col1004, col1005 = st.columns([10,10,10,10,15])
     with col1005:
         st.markdown("""
