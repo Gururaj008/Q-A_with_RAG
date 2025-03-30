@@ -32,19 +32,19 @@ st.subheader('How to use the app')
 st.markdown("""
 
 1.  **Upload your CSV file**: Use the file uploader below to upload the CSV file you want to analyze.
-</div>
+
 """)
 st.write('')
 st.markdown("""
 
 2.  **Enter your question**: Once the CSV is uploaded and previewed, a text input box will appear. Enter your question about the data in this box. Be as specific as possible for better results.
-</div>
+
 """)
 st.write('')
 st.markdown("""
 
 3.  **Get your answer**: Click the "Submit" button. The application will process your question using AI and display the answer below.
-</div>
+
 """)
 
 st.write('')
