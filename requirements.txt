@@ -83,6 +83,7 @@ langchain-community==0.0.12
 langchain-core==0.1.10
 langchain-experimental==0.0.49
 langchain-openai==0.0.2.post1
+langchain-google-genai
 langsmith==0.0.80
 markdown-it-py==3.0.0
 MarkupSafe==2.1.3
