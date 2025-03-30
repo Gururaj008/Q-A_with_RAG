@@ -7,7 +7,7 @@ from langchain.docstore.document import Document
 
 # Set up Streamlit page
 st.set_page_config(layout="wide", page_title="CSV Q&A Alternative Approach")
-st.title("CSV Q&A: Alternative Approach")
+st.title("Talk to your CSV data")
 
 # Upload CSV file
 uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
