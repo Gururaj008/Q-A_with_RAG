@@ -29,8 +29,8 @@ def get_agent(df):
 def fetch_the_answer(df, question):
     agent = get_agent(df)
 
-    # Update conversation history with the current question
-    st.session_state.conversation_history += f"User: {question}\n"
+    # For testing, you might want to clear previous conversation history:
+    st.session_state.conversation_history = f"User: {question}\n"
 
     # Additional instructions for the agent
     prompt_instructions = (
@@ -39,18 +39,25 @@ def fetch_the_answer(df, question):
         "present the results in tabular form using Markdown."
     )
     
-    # Build the prompt with column information if provided
+    # Optionally, include a summary of the CSV data in the prompt for more context.
+    # Uncomment the following lines for testing:
+    # csv_summary = df.head(5).to_csv(index=False)
+    # context_text = f"Here is a summary of the data:\n{csv_summary}\n"
+    # Otherwise, context_text can be an empty string.
+    context_text = ""
+
+    # Build the prompt with column info if provided
     if re.search(r"Column: (.+?)\n", question):
         match = re.search(r"Column: (.+?)\n", question)
         st.session_state.selected_column = match.group(1)
-        prompt = f"Answer the following question: {question} {prompt_instructions}\n{st.session_state.conversation_history}"
+        prompt = f"Answer the following question: {question} {prompt_instructions}\n{context_text}{st.session_state.conversation_history}"
     elif st.session_state.selected_column:
         prompt = (
             f"Answer the following question: {question} {prompt_instructions}\n"
-            f"Column: {st.session_state.selected_column}\n{st.session_state.conversation_history}"
+            f"Column: {st.session_state.selected_column}\n{context_text}{st.session_state.conversation_history}"
         )
     else:
-        prompt = f"Answer the following question: {question} {prompt_instructions}\n{st.session_state.conversation_history}"
+        prompt = f"Answer the following question: {question} {prompt_instructions}\n{context_text}{st.session_state.conversation_history}"
     
     # DEBUG: Print the prompt being sent (remove or comment out after debugging)
     st.write("DEBUG: Prompt being sent to the agent:")
@@ -65,15 +72,15 @@ def fetch_the_answer(df, question):
     if not res:
         return "No answer was generated. Please rephrase your question or provide more context."
     
-    # Optionally, extract column information from the response
+    # Optionally, extract column info from the response
     column_match = re.search(r"Column: (.+?)\n", res)
     if column_match:
         st.session_state.selected_column = column_match.group(1)
     
-    # Update conversation history with the assistant's response
     st.session_state.conversation_history += f"Assistant: {res}\nColumn: {st.session_state.selected_column}\n"
     return res
 
+# Streamlit app UI
 if __name__ == "__main__":
     st.set_page_config(layout="wide")
     
@@ -89,28 +96,34 @@ if __name__ == "__main__":
     
     st.header('About the project')
     st.markdown(
-        '<div style="text-align: justify">InsightfulTalks: "Transforming Data into Conversational Wisdom" is an innovative project that seamlessly integrates advanced language models into the data exploration process. This application empowers users to engage in dynamic conversations with their datasets, fostering a natural and interactive exploration experience.</div>',
+        '<div style="text-align: justify">InsightfulTalks is an innovative project that integrates advanced language models into data exploration. Engage in dynamic conversations with your dataset to extract meaningful insights.</div>',
         unsafe_allow_html=True
     )
     st.markdown(
-        '<div style="text-align: justify">The AI-driven conversation provides instant, context-aware responses, enabling users to extract meaningful insights efficiently. Results are presented in Markdown format with structured tables when appropriate.</div>',
+        '<div style="text-align: justify">Results are presented in Markdown format, and structured tables will be used whenever possible.</div>',
         unsafe_allow_html=True
     )
     
     st.subheader('Steps on how to use the app')
-    st.markdown('<div style="text-align: justify">1. Upload Data: Choose and upload your CSV file containing the data you want to explore.</div>', unsafe_allow_html=True)
-    st.markdown('<div style="text-align: justify">2. Ask a Question: Pose questions about your data in the provided text box.</div>', unsafe_allow_html=True)
-    st.markdown('<div style="text-align: justify">3. Generate Insights: Click the button to get AI-generated answers and insights about your data.</div>', unsafe_allow_html=True)
-    st.markdown('<div style="text-align: justify">4. Repeat as Needed: Continue the process to have dynamic conversations and gain deeper insights into your dataset.</div>', unsafe_allow_html=True)
+    st.markdown('<div style="text-align: justify">1. Upload your CSV file containing the data.</div>', unsafe_allow_html=True)
+    st.markdown('<div style="text-align: justify">2. Enter your question (e.g., "Which city is Alice from?").</div>', unsafe_allow_html=True)
+    st.markdown('<div style="text-align: justify">3. Click "Generate Answer" to get AI-generated insights.</div>', unsafe_allow_html=True)
     
     st.write('')
     
-    # CSV file uploader
+    # Reset conversation button for testing
+    if st.button("Reset Conversation"):
+        st.session_state.conversation_history = ""
+        st.session_state.selected_column = None
+        st.success("Conversation history reset.")
+    
+    # File uploader for CSV file
     uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
+        st.success("Data loaded successfully!")
         with st.form(key='my_form'):
-            question = st.text_input("Enter your question")
+            question = st.text_input("Enter your question", value="Which city is Alice from?")
             submit_button = st.form_submit_button(label='Generate Answer')
             if submit_button and question:
                 st.success('Processing your question...')
