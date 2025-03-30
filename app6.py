@@ -112,3 +112,16 @@ Answer:"""
         st.error(f"Error processing CSV: {e}")
 else:
     st.warning("Please upload a CSV file to begin.")
+
+
+
+st.divider()
+    col1001, col1002, col1003, col1004, col1005 = st.columns([10,10,10,10,15])
+    with col1005:
+        st.markdown("""
+            <style>
+            @import url('https://fonts.googleapis.com/css2?family=Agdasima');
+            .custom-text-10 { font-family: 'Agdasima', sans-serif; font-size: 28px; color: Gold; }
+            </style>
+            <p class="custom-text-10">An Effort by : MAVERICK_GR</p>
+        """, unsafe_allow_html=True)
