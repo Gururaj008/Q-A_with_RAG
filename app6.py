@@ -19,7 +19,7 @@ def get_chat_model():
     print("Initializing Chat Model...") # Add print statement to see when it runs
     return ChatGoogleGenerativeAI(
         api_key=st.secrets["GOOGLE_API_KEY"],
-        model="gemini-2.0-flash-thinking-exp-01-21",
+        model="gemini-1.5-flash",
         temperature=0.0,
         # max_tokens=4000 # Consider adjusting if needed, but default might be fine
         # convert_system_message_to_human=True # Might be needed for some older Langchain versions/models
