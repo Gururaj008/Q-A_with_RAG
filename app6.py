@@ -15,7 +15,7 @@ if "selected_column" not in st.session_state:
 def get_chat_model():
     return ChatGoogleGenerativeAI(
         api_key=st.secrets["GOOGLE_API_KEY"],
-        model="gemini-2.5-pro-exp-03-25",
+        model="gemini-pro",
         temperature=0.0,
         max_tokens=4000
     )
