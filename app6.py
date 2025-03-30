@@ -26,27 +26,19 @@ def get_agent(df):
     chat = get_chat_model()
     return create_pandas_dataframe_agent(chat, df, agent_executor_kwargs={'handle_parsing_errors': True})
 
+      
 def fetch_the_answer(df, question):
     agent = get_agent(df)
 
-    # For testing, you might want to clear previous conversation history:
     st.session_state.conversation_history = f"User: {question}\n"
 
-    # Additional instructions for the agent
     prompt_instructions = (
         "If you feel the question is incomplete or if you don't understand the question, "
         "please ask the user to provide more information. While answering, whenever possible, "
         "present the results in tabular form using Markdown."
     )
-    
-    # Optionally, include a summary of the CSV data in the prompt for more context.
-    # Uncomment the following lines for testing:
-    # csv_summary = df.head(5).to_csv(index=False)
-    # context_text = f"Here is a summary of the data:\n{csv_summary}\n"
-    # Otherwise, context_text can be an empty string.
     context_text = ""
 
-    # Build the prompt with column info if provided
     if re.search(r"Column: (.+?)\n", question):
         match = re.search(r"Column: (.+?)\n", question)
         st.session_state.selected_column = match.group(1)
@@ -58,28 +50,28 @@ def fetch_the_answer(df, question):
         )
     else:
         prompt = f"Answer the following question: {question} {prompt_instructions}\n{context_text}{st.session_state.conversation_history}"
-    
-    # DEBUG: Print the prompt being sent (remove or comment out after debugging)
+
     st.write("DEBUG: Prompt being sent to the agent:")
     st.code(prompt)
-    
+
     try:
         res = agent.run(prompt)
+        if not res:
+            return "The model returned an empty response. Please try again or rephrase your question."
+        column_match = re.search(r"Column: (.+?)\n", res)
+        if column_match:
+            st.session_state.selected_column = column_match.group(1)
+
+        st.session_state.conversation_history += f"Assistant: {res}\nColumn: {st.session_state.selected_column}\n"
+        return res
+
     except Exception as e:
         st.write("DEBUG: Exception details:", e)
+        if "list index out of range" in str(e):
+            return "The model was unable to generate a complete response. It might be due to temporary issues with the service. Please try again or rephrase your question."
         return f"An error occurred while generating an answer: {str(e)}"
-    
-    if not res:
-        return "No answer was generated. Please rephrase your question or provide more context."
-    
-    # Optionally, extract column info from the response
-    column_match = re.search(r"Column: (.+?)\n", res)
-    if column_match:
-        st.session_state.selected_column = column_match.group(1)
-    
-    st.session_state.conversation_history += f"Assistant: {res}\nColumn: {st.session_state.selected_column}\n"
-    return res
 
+    
 # Streamlit app UI
 if __name__ == "__main__":
     st.set_page_config(layout="wide")
